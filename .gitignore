@@ -1,0 +1,6 @@
+.history
+*.auto.pkrvars.hcl
+*.log
+*.pkrvars.hcl
+.env
+*.py
