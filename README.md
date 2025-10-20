@@ -37,7 +37,7 @@ provisioners/
 
 the resulting template is cloud-init enabled
 
-default packages include qemu-guest-agent, curl, git, htop, tmux, and vim
+default packages include qemu-guest-agent, curl, git, htop, tmux, and vim-gtk3
 
 adjust the scripts and variables as needed for your environment
 
