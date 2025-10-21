@@ -14,6 +14,15 @@ variable "proxmox_token" {
   sensitive = true
 }
 
+variable "proxmox_ssh_host" {
+  type = string
+}
+
+variable "proxmox_ssh_user" {
+  type    = string
+  default = null
+}
+
 # node name
 variable "proxmox_node" {
   type = string
