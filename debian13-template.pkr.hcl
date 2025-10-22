@@ -35,7 +35,7 @@ source "proxmox-clone" "debian13" {
 build {
   sources = ["source.proxmox-clone.debian13"]
 
-  # upload & run our provisioners
+  # upload & run provisioners
   provisioner "file" {
     source      = "provisioners/10-base.sh"
     destination = "/tmp/10-base.sh"

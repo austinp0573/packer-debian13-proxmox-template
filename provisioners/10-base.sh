@@ -2,14 +2,14 @@
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-# Let cloud-init finish first (often running apt)
+# let cloud-init finish first (often running apt)
 cloud-init status --wait || true
 
-# Stop/disable apt timers that grab locks at boot
+# stop/disable apt timers that grab locks at boot
 systemctl stop apt-daily.service apt-daily-upgrade.service || true
 systemctl disable --now apt-daily.timer apt-daily-upgrade.timer || true
 
-# Wait for locks to clear
+# wait for locks to clear
 while pgrep -x apt >/dev/null || pgrep -x apt-get >/dev/null || \
       pgrep -x unattended-upgrade >/dev/null || \
       fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
@@ -17,10 +17,10 @@ while pgrep -x apt >/dev/null || pgrep -x apt-get >/dev/null || \
   sleep 3
 done
 
-# Recover any half-configured packages
+# recover any half-configured packages
 dpkg --configure -a || true
 
-# Retry wrapper for apt-get
+# retry wrapper for apt-get
 retry() { n=0; until "$@"; do n=$((n+1)); [ $n -ge 5 ] && exit 1; sleep 5; done; }
 
 retry apt-get update -y
