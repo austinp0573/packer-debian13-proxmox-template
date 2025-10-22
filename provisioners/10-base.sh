@@ -25,7 +25,7 @@ retry() { n=0; until "$@"; do n=$((n+1)); [ $n -ge 5 ] && exit 1; sleep 5; done;
 
 retry apt-get update -y
 retry apt-get dist-upgrade -y
-retry apt-get install -y qemu-guest-agent curl wget git htop tmux vim ca-certificates
+retry apt-get install -y qemu-guest-agent curl wget git htop tmux vim-gtk3 ca-certificates
 
 systemctl enable qemu-guest-agent || true
 
