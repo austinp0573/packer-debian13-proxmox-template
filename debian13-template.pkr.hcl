@@ -16,6 +16,8 @@ source "proxmox-clone" "debian13" {
 
   # disk & nic settings of the clone
   # (these inhereit from the close, change as needed)
+  # when hardware supports it, add vlan_tag = <id>
+  # if ommitted, inhereits from the seed
   network_adapters {
     bridge = "vmbr0"
     model  = "virtio"
