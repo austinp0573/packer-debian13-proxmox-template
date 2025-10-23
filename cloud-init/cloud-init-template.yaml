@@ -1,12 +1,14 @@
 #cloud-config
 package_update: true
 package_upgrade: true
+preserve_hostname: false
+hostname: debian13-base
 
-packages:
-  - qemu-guest-agent
-  - curl
-  - htop
-  - ca-certificates
+# packages: -- 10-base.sh single source of truth, remove from virt-customize and cloud-init
+#  - qemu-guest-agent
+#  - curl
+#  - htop
+#  - ca-certificates
 
 
 ssh_pwauth: false
@@ -33,3 +35,12 @@ resize_rootfs: true   # (alias kept for compatibility; cloud-init will resize ro
 # Ensure qemu-guest-agent is running
 runcmd:
   - systemctl enable --now qemu-guest-agent
+  - date > /etc/VM_birthday
+  - |
+    if [ ! -f /etc/hostname.seeded ]; then
+      rnd=$(cat /dev/urandom | tr -dc 'a-z0-9' | head -c 4)
+      new="debian13-base-${rnd}"
+      hostnamectl set-hostname "$new"
+      sed -i "s/^127\.0\.1\.1.*/127.0.1.1 $new/" /etc/hosts || echo "127.0.1.1 $new" >> /etc/hosts
+      echo "$new" > /etc/hostname.seeded
+    fi
