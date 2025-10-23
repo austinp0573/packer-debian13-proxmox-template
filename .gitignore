@@ -4,5 +4,5 @@
 *.pkrvars.hcl
 .env
 *.py
-documentation.txt
+documentation.*
 ask.*
