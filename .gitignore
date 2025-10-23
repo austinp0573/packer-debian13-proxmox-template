@@ -2,7 +2,8 @@
 *.auto.pkrvars.hcl
 *.log
 *.pkrvars.hcl
-.env
+*.env*
 *.py
-documentation.*
+documentation*
 ask.*
+cloud-init.yaml

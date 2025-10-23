@@ -3,7 +3,7 @@ source "proxmox-clone" "debian13" {
   proxmox_url              = var.proxmox_url
   username                 = var.proxmox_token_id
   token                    = var.proxmox_token
-  insecure_skip_tls_verify = true # TODO: change later
+  # insecure_skip_tls_verify = true # TODO: change later
   scsi_controller          = "virtio-scsi-pci"
 
   node        = var.proxmox_node
@@ -53,8 +53,8 @@ build {
   post-processor "shell-local" {
     inline = [
       "set -euo pipefail",
-      "curl -ks -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.vmid_start}/config' --data-urlencode 'name=${var.template_name}' --data-urlencode 'description=${var.template_description}'",
-      "curl -ks -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.vmid_start}/template'"
+      "curl -ksf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.vmid_start}/config' --data-urlencode 'name=${var.template_name}' --data-urlencode 'description=${var.template_description}'",
+      "curl -ksf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.vmid_start}/template'"
     ]
   }
 }

@@ -1,0 +1,35 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+packages:
+  - qemu-guest-agent
+  - curl
+  - htop
+  - ca-certificates
+
+
+ssh_pwauth: false
+disable_root: true
+users:
+  - name: $USERS_NAME
+    lock_passwd: false
+    sudo: $USERS_SUDO
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - $SSH_AUTHORIZED_KEYS
+    passwd: $PASSWD
+
+# Prefer cloud-init modules over manual commands:
+timezone: $TIMEZONE
+
+# Auto-expand root disk/FS without guessing device names
+growpart:
+  mode: auto
+  devices: ['/']
+  ignore_growroot_disabled: false
+resize_rootfs: true   # (alias kept for compatibility; cloud-init will resize root FS)
+
+# Ensure qemu-guest-agent is running
+runcmd:
+  - systemctl enable --now qemu-guest-agent
