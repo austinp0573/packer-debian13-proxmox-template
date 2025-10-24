@@ -58,10 +58,10 @@ build {
     ". ./cloud-init/cloud-init-secrets.env && envsubst < ./cloud-init/cloud-init-template.yaml > /tmp/debian13-cloud-init.yaml",
 
     # 2) upload to snippets
-    "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -F content=snippets -F filename=debian13-cloud-init.yaml -F file=@/tmp/debian13-cloud-init.yaml '${var.proxmox_url}/nodes/${var.proxmox_node}/storage/${var.proxmox_storage}/upload'",
+    "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -F content=snippets -F filename=debian13-cloud-init.yaml -F file=@/tmp/debian13-cloud-init.yaml '${var.proxmox_url}/nodes/${var.proxmox_node}/storage/${var.proxmox_snippet_storage}/upload'",
 
     # 3) set cicustom on the TEMPLATE
-    "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST --data-urlencode 'cicustom=user=${var.proxmox_storage}:snippets/debian13-cloud-init.yaml,network=${var.proxmox_storage}:snippets/net-dhcp.yaml' '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.seed_template_id}/config'",
+    "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST --data-urlencode 'cicustom=user=${var.proxmox_snippet_storage}:snippets/debian13-cloud-init.yaml,network=${var.proxmox_snippet_storage}:snippets/net-dhcp.yaml' '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.seed_template_id}/config'",
 
     # 4) regenerate cloud-init ISO for the template
     "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.seed_template_id}/cloudinit'",
