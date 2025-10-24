@@ -33,6 +33,12 @@ variable "proxmox_storage" {
   type = string
 }
 
+# add another var. for location of snippet storage
+variable "proxmox_snippet_storage" {
+  type        = string
+  description = "proxmox storage ID used for snippets"
+}
+
 # seed vmid e.g., 9000
 variable "seed_template_id" {
   type = number
