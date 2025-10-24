@@ -32,6 +32,13 @@ growpart:
   ignore_growroot_disabled: false
 resize_rootfs: true   # (alias kept for compatibility; cloud-init will resize root FS)
 
+write_files:
+  - path: /etc/motd
+    permissions: "0644"
+    content: |
+      Welcome to Debian 13 (cloud-init)
+
+
 # Ensure qemu-guest-agent is running
 runcmd:
   - systemctl enable --now qemu-guest-agent
@@ -44,3 +51,5 @@ runcmd:
       sed -i "s/^127\.0\.1\.1.*/127.0.1.1 $new/" /etc/hosts || echo "127.0.1.1 $new" >> /etc/hosts
       echo "$new" > /etc/hostname.seeded
     fi
+
+final_message: "Cloud-init completed on Debian 13: $VERSION"
