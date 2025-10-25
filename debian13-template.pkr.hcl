@@ -1,10 +1,10 @@
 # source: proxmox-clone
 source "proxmox-clone" "debian13" {
-  proxmox_url              = var.proxmox_url
-  username                 = var.proxmox_token_id
-  token                    = var.proxmox_token
+  proxmox_url = var.proxmox_url
+  username    = var.proxmox_token_id
+  token       = var.proxmox_token
   # insecure_skip_tls_verify = true # TODO: change later
-  scsi_controller          = "virtio-scsi-pci"
+  scsi_controller = "virtio-scsi-pci"
 
   node        = var.proxmox_node
   vm_id       = var.vmid_start       # omit to let packer assign
@@ -25,10 +25,15 @@ source "proxmox-clone" "debian13" {
 
   # communicator: the seed has cloud-init enabled; proxmox injects a one-time dhcp + ssh key for packer
   communicator = "ssh"
-  ssh_username = "debian" # genericcloud defaults: debian user exists with key auth
+
+  # genericcloud defaults: debian user exists with key auth
+  ssh_username = "debian"
+
   # cloud-init injected ssh key automatically, no password needed 
-  ssh_timeout            = "20m"
-  ssh_handshake_attempts = 40
+  ssh_timeout            = "10m"
+  ssh_handshake_attempts = 60
+  ssh_agent_auth         = false
+  ssh_private_key_file   = var.ssh_private_key_file
 }
 
 # build: provision, convert to template
@@ -36,6 +41,11 @@ build {
   sources = ["source.proxmox-clone.debian13"]
 
   # upload & run provisioners
+  provisioner "file" {
+    source      = "provisioners/htoprc"
+    destination = "/tmp/htoprc"
+  }
+
   provisioner "file" {
     source      = "provisioners/10-base.sh"
     destination = "/tmp/10-base.sh"
@@ -51,24 +61,36 @@ build {
   provisioner "shell" { inline = ["sudo /tmp/90-cloudinit-clean.sh"] }
 
   post-processor "shell-local" {
-  inline = [
-    "set -euo pipefail",
+    keep_input_artifact = true
+    inline = [<<-EOF
+set -euo pipefail
 
-    # 1) render user-data from template + secrets (POSIX dot to source)
-    ". ./cloud-init/cloud-init-secrets.env && envsubst < ./cloud-init/cloud-init-template.yaml > /tmp/debian13-cloud-init.yaml",
+PROX_SSH="${var.proxmox_node_ssh_user}@${var.proxmox_node}"          # or an IP/DNS of the node
+SNIP_STORE="${var.proxmox_snippet_storage}"   # must be a directory storage (e.g., 'local')
+SNIP_DIR="${var.proxmox_snippet_storage_path}"     # path for 'local' directory storage
+VMID="${var.vmid_start}"                      # the built VM becomes the template
+INJECTED_CLOUDINIT_FILENAME="${var.injected_cloudinit_filename}"
 
-    # 2) upload to snippets
-    "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -F content=snippets -F filename=debian13-cloud-init.yaml -F file=@/tmp/debian13-cloud-init.yaml '${var.proxmox_url}/nodes/${var.proxmox_node}/storage/${var.proxmox_snippet_storage}/upload'",
+# 1) combine local cloud-init-secrets.env with cloud-init-template.yaml to get template that will be injected and enabled
+# at the end for the subsequent vm-clones from that template
+. ./cloud-init/cloud-init-secrets.env
+envsubst < ./cloud-init/cloud-init-template.yaml > /tmp/$INJECTED_CLOUDINIT_FILENAME
 
-    # 3) set cicustom on the TEMPLATE
-    "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST --data-urlencode 'cicustom=user=${var.proxmox_snippet_storage}:snippets/debian13-cloud-init.yaml,network=${var.proxmox_snippet_storage}:snippets/net-dhcp.yaml' '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.seed_template_id}/config'",
+# 2) securely deposit created cloud-init.yaml in the correct location on the proxmox host
+ssh -o StrictHostKeyChecking=no "$PROX_SSH" "mkdir -p '$SNIP_DIR'"
+scp -o StrictHostKeyChecking=no "/tmp/$INJECTED_CLOUDINIT_FILENAME" "$PROX_SSH:$SNIP_DIR/$INJECTED_CLOUDINIT_FILENAME"
 
-    # 4) regenerate cloud-init ISO for the template
-    "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.seed_template_id}/cloudinit'",
+# 3) set cicustom on the new vm template
+ssh -o StrictHostKeyChecking=no "$PROX_SSH" \
+  "qm set $VMID --cicustom user=$${SNIP_STORE}:snippets/$INJECTED_CLOUDINIT_FILENAME,network=$${SNIP_STORE}:snippets/net-dhcp.yaml"
 
-    # 5) rename and convert to template
-    "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.vmid_start}/config' --data-urlencode 'name=${var.template_name}' --data-urlencode 'description=${var.template_description}'",
-    "curl -sf -H 'Authorization: PVEAPIToken=${var.proxmox_token_id}=${var.proxmox_token}' -X POST '${var.proxmox_url}/nodes/${var.proxmox_node}/qemu/${var.vmid_start}/template'"
+# verify cloud-init content
+ssh -o StrictHostKeyChecking=no "$PROX_SSH" "qm cloudinit dump $VMID user >/dev/null && qm cloudinit dump $VMID network >/dev/null"
+
+# 4) rename and convert the just-built vm into the final template
+ssh -o StrictHostKeyChecking=no "$PROX_SSH" \
+  "qm set $VMID --ide2 local-zfs:cloudinit"
+EOF
     ]
   }
-}
+}  

@@ -8,3 +8,4 @@ documentation*
 ask.*
 cloud-init.yaml
 cloud-init0.yaml
+debian13-cloud-init.yaml

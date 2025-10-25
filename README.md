@@ -41,6 +41,8 @@ default packages include qemu-guest-agent, curl, git, htop, tmux, and vim-gtk3
 
 adjust the scripts and variables as needed for your environment
 
+altering the --cicustom cloud-init associated with the seed with disrupt the ssh connection required, don't do anything to the seed without understand the implications
+
 
 &nbsp;
 

@@ -23,6 +23,19 @@ variable "proxmox_ssh_user" {
   default = null
 }
 
+# ssh key packer will use
+variable "ssh_private_key_file" {
+  type = string
+}
+
+variable "ssh_pubkey_path" {
+  type = string
+}
+
+variable "proxmox_node_ssh_user" {
+  type = string
+}
+
 # node name
 variable "proxmox_node" {
   type = string
@@ -37,6 +50,14 @@ variable "proxmox_storage" {
 variable "proxmox_snippet_storage" {
   type        = string
   description = "proxmox storage ID used for snippets"
+}
+
+variable "proxmox_snippet_storage_path" {
+  type = string
+}
+
+variable "injected_cloudinit_filename" {
+  type = string
 }
 
 # seed vmid e.g., 9000
