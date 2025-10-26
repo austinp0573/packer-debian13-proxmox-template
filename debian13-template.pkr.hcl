@@ -47,8 +47,28 @@ build {
   }
 
   provisioner "file" {
+    source      = "provisioners/.bash_aliases"
+    destination = "/tmp/.bash_aliases"
+  }
+
+  provisioner "file" {
+    source      = "provisioners/set-hostname-once.sh"
+    destination = "/tmp/set-hostname-once.sh"
+  }
+
+  provisioner "file" {
+    source      = "provisioners/set-hostname-once.service"
+    destination = "/tmp/set-hostname-once.service"
+  }
+
+  provisioner "file" {
     source      = "provisioners/10-base.sh"
     destination = "/tmp/10-base.sh"
+  }
+
+  provisioner "file" {
+    source      = "provisioners/20-extras.sh"
+    destination = "/tmp/20-extras.sh"
   }
 
   provisioner "file" {
@@ -56,8 +76,9 @@ build {
     destination = "/tmp/90-cloudinit-clean.sh"
   }
 
-  provisioner "shell" { inline = ["chmod +x /tmp/10-base.sh /tmp/90-cloudinit-clean.sh"] }
+  provisioner "shell" { inline = ["chmod +x /tmp/10-base.sh /tmp/20-extras.sh /tmp/90-cloudinit-clean.sh"] }
   provisioner "shell" { inline = ["sudo /tmp/10-base.sh"] }
+  provisioner "shell" { inline = ["sudo /tmp/20-extras.sh"] }
   provisioner "shell" { inline = ["sudo /tmp/90-cloudinit-clean.sh"] }
 
   post-processor "shell-local" {

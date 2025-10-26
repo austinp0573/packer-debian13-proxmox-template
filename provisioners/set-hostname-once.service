@@ -1,0 +1,13 @@
+[Unit]
+Description=Set randomized hostname after cloud-init
+Wants=cloud-final.service
+After=cloud-final.service
+ConditionPathExists=!/etc/hostname.seeded
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/set-hostname-once.sh
+ExecStartPost=/usr/bin/touch /etc/hostname.seeded
+
+[Install]
+WantedBy=cloud-final.service

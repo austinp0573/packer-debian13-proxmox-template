@@ -1,15 +1,8 @@
 #cloud-config
 package_update: true
 package_upgrade: true
-preserve_hostname: false
-hostname: debian13-base
-
-# packages: -- 10-base.sh single source of truth, remove from virt-customize and cloud-init
-#  - qemu-guest-agent
-#  - curl
-#  - htop
-#  - ca-certificates
-
+preserve_hostname: true
+hostname: ""
 
 ssh_pwauth: false
 disable_root: true
@@ -22,15 +15,13 @@ users:
       - $SSH_AUTHORIZED_KEYS
     passwd: $PASSWD
 
-# Prefer cloud-init modules over manual commands:
 timezone: $TIMEZONE
 
-# Auto-expand root disk/FS without guessing device names
 growpart:
   mode: auto
   devices: ['/']
   ignore_growroot_disabled: false
-resize_rootfs: true   # (alias kept for compatibility; cloud-init will resize root FS)
+resize_rootfs: true
 
 write_files:
   - path: /etc/motd
@@ -38,18 +29,8 @@ write_files:
     content: |
       Welcome to Debian 13 (cloud-init)
 
-
-# Ensure qemu-guest-agent is running
 runcmd:
   - systemctl enable --now qemu-guest-agent
   - date > /etc/VM_birthday
-  - |
-    if [ ! -f /etc/hostname.seeded ]; then
-      rnd=$(cat /dev/urandom | tr -dc 'a-z0-9' | head -c 4)
-      new="debian13-base-${rnd}"
-      hostnamectl set-hostname "$new"
-      sed -i "s/^127\.0\.1\.1.*/127.0.1.1 $new/" /etc/hosts || echo "127.0.1.1 $new" >> /etc/hosts
-      echo "$new" > /etc/hostname.seeded
-    fi
 
 final_message: "Cloud-init completed on Debian 13: $VERSION"
