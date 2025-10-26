@@ -24,10 +24,11 @@ growpart:
 resize_rootfs: true
 
 write_files:
-  - path: /etc/motd
-    permissions: "0644"
+  - path: /etc/profile.d/motd.sh
+    permissions: "0755"
     content: |
-      Welcome to Debian 13 (cloud-init)
+      #!/bin/bash
+      echo "Welcome to $(hostname)"
 
 runcmd:
   - systemctl enable --now qemu-guest-agent
