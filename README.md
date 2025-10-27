@@ -1,7 +1,7 @@
 # debian 13 proxmox template (packer)
 
 this project builds a debian 13 (trixie) proxmox vm template using hashicorp packer and the official proxmox plugin
-it clones a base debian 13 genericcloud image, provisions updates and basic packages and prepares it as a cloud-init ready template
+it clones a base debian 13 genericcloud image (the seed template) provisions updates and basic packages and prepares it as a cloud-init ready template
 
 ## requirements
 - proxmox ve 8 or later
@@ -23,8 +23,8 @@ it clones a base debian 13 genericcloud image, provisions updates and basic pack
 
 ## file structure
 ```cpp
-copy code
 packer.pkr.hcl
+secrets.auto.pkrvars.hcl
 variables.pkr.hcl
 debian13-template.pkr.hcl
 provisioners/
@@ -41,7 +41,12 @@ default packages include qemu-guest-agent, curl, git, htop, tmux, and vim-gtk3
 
 adjust the scripts and variables as needed for your environment
 
-altering the --cicustom cloud-init associated with the seed with disrupt the ssh connection required, don't do anything to the seed without understand the implications
+altering the --cicustom cloud-init associated with the seed will disrupt the ssh connection required, don't do anything to the seed without understand the implications
+
+TODO:
+- explain seed template creation, improperly created/configured seed template would prevent the packer build from working
+- add example secrets.auto.pkrvars.hcl
+- adjust file structure to accurately reflect finished packer build
 
 
 &nbsp;
