@@ -101,9 +101,15 @@ envsubst < ./cloud-init/cloud-init-template.yaml > /tmp/$INJECTED_CLOUDINIT_FILE
 ssh -o StrictHostKeyChecking=no "$PROX_SSH" "mkdir -p '$SNIP_DIR'"
 scp -o StrictHostKeyChecking=no "/tmp/$INJECTED_CLOUDINIT_FILENAME" "$PROX_SSH:$SNIP_DIR/$INJECTED_CLOUDINIT_FILENAME"
 
+# 3) old version, if --cicustom assigns that network .yaml, using my ISP router, it will not allow terrafrom to 
+# 3) set the VM clones IP properly
+# 3) might need to add a: qm set $VMID --ipconfig0 ip=dhcp \ qm set $VMID --nameserver '' --searchdomain ''
+# ssh -o StrictHostKeyChecking=no "$PROX_SSH" \
+#  "qm set $VMID --cicustom user=$${SNIP_STORE}:snippets/$INJECTED_CLOUDINIT_FILENAME,network=$${SNIP_STORE}:snippets/net-dhcp.yaml"
+
 # 3) set cicustom on the new vm template
 ssh -o StrictHostKeyChecking=no "$PROX_SSH" \
-  "qm set $VMID --cicustom user=$${SNIP_STORE}:snippets/$INJECTED_CLOUDINIT_FILENAME,network=$${SNIP_STORE}:snippets/net-dhcp.yaml"
+  "qm set $VMID --cicustom user=$${SNIP_STORE}:snippets/$INJECTED_CLOUDINIT_FILENAME"
 
 # verify cloud-init content
 ssh -o StrictHostKeyChecking=no "$PROX_SSH" "qm cloudinit dump $VMID user >/dev/null && qm cloudinit dump $VMID network >/dev/null"
