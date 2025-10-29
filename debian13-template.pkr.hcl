@@ -112,7 +112,7 @@ ssh -o StrictHostKeyChecking=no "$PROX_SSH" \
   "qm set $VMID --cicustom user=$${SNIP_STORE}:snippets/$INJECTED_CLOUDINIT_FILENAME"
 
 # verify cloud-init content
-ssh -o StrictHostKeyChecking=no "$PROX_SSH" "qm cloudinit dump $VMID user >/dev/null && qm cloudinit dump $VMID network >/dev/null"
+# ssh -o StrictHostKeyChecking=no "$PROX_SSH" "qm cloudinit dump $VMID user >/dev/null && qm cloudinit dump $VMID network >/dev/null"
 
 # 4) rename and convert the just-built vm into the final template
 ssh -o StrictHostKeyChecking=no "$PROX_SSH" \

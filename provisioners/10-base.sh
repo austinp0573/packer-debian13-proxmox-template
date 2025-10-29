@@ -27,7 +27,7 @@ sed -i -E '/^Components:.*\bmain\b/ s/\bmain\b/& contrib/' /etc/apt/sources.list
 
 retry apt-get update -y
 retry apt-get dist-upgrade -y
-retry apt-get install -y qemu-guest-agent curl wget git htop tmux vim-nox ca-certificates
+retry apt-get install -y qemu-guest-agent curl wget git htop tmux vim-nox fastfetch ca-certificates
 
 systemctl enable qemu-guest-agent || true
 
